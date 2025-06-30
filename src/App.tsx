@@ -9,9 +9,19 @@ import { ImportPage } from './pages/ImportPage';
 type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = [
   {
-    key: '/import',
+    key: '1',
     icon: <PlusOutlined />,
-    label: "Nhập nhân viên"
+    label: "Thêm nhân viên",
+    children: [
+      {
+        key: '/normalimport',
+        label: "Nhập nhân viên"
+      },
+      {
+        key: '/excelimport',
+        label: "Nhập nhân viên từ excel"
+      }
+    ]
   },
   {
     key: '/control',
@@ -24,8 +34,8 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const menuItemOnClick: MenuProps["onClick"] = (e) => {
-    if(e.key === "/import"){
-      navigate("/import");
+    if(e.key === "/normalimport"){
+      navigate("/normalimport");
     }
   };
 
@@ -39,7 +49,7 @@ function App() {
       />
       <Routes>
         <Route path='/' element={<HomePage />} />
-        <Route path='/import' element={<ImportPage />} />
+        <Route path='/normalimport' element={<ImportPage />} />
       </Routes>
     </Flex>
   )

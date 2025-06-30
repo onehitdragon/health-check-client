@@ -1,32 +1,69 @@
-import { Button, DatePicker, Flex, Form, Input, Select, Typography } from "antd";
+import { Button, DatePicker, Flex, Form, Input, message, Select, Typography } from "antd";
 import type { FormProps } from "antd";
+import { useForm } from "antd/es/form/Form";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
+import api from "../api";
+import axios from "axios";
 
 const { Title } = Typography;
 type FieldType = {
     mst: string,
     fullname: string,
-    gender: boolean,
-    birthday: Date,
+    gender: number,
+    birthday: Dayjs,
     cccd: string,
-    cccdDate: Date,
+    cccdDate: Dayjs,
     cccdAt: string,
     phone: string,
     address: string,
     work: string,
     workPlace: string
 }
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log(values);
-};
 
 export function ImportPage(){
+    const [form] = useForm();
+    const [loading, setLoading] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+        const employee = {
+            ...values,
+            birthday: values.birthday.format("YYYY-MM-DD"),
+            cccdDate: values.cccdDate.format("YYYY-MM-DD")
+        };
+        setLoading(true);
+        try{
+            const res = await api.post("/employee/add", employee);
+            messageApi.info(`Đã thêm: ${employee.fullname}`);
+        }
+        catch(err){
+            if(axios.isAxiosError(err) && err.status == 400){
+                if("mstErr" in err.response?.data){
+                    form.setFields([{name: "mst", errors: ["Mã nhân viên đã tồn tại"]}]);
+                }
+                if("cccdErr" in err.response?.data){
+                    form.setFields([{name: "cccd", errors: ["CCCD/CMND đã tồn tại"]}]);
+                }
+                if("phoneErr" in err.response?.data){
+                    form.setFields([{name: "phone", errors: ["Số điện thoại đã tồn tại"]}]);
+                }
+                messageApi.error("Cần kiểm tra lại thông tin");
+            }
+        }
+        setLoading(false);
+    };
+
     return (
+        <>
+        {contextHolder}
         <Flex vertical flex={1}>
             <Title>Nhập nhân viên</Title>
             <Form
                 labelCol={{ span: 5 }}
                 style={{ maxWidth: 600 }}
                 autoComplete="off"
+                form={form}
                 onFinish={onFinish}
             >
                 <Form.Item<FieldType>
@@ -51,8 +88,8 @@ export function ImportPage(){
                     <Select
                         placeholder="Chọn giới tính"
                     >
-                        <Select.Option value={true}>Nam</Select.Option>
-                        <Select.Option value={false}>Nữ</Select.Option>
+                        <Select.Option value={1}>Nam</Select.Option>
+                        <Select.Option value={0}>Nữ</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item<FieldType>
@@ -60,7 +97,7 @@ export function ImportPage(){
                     name="birthday"
                     rules={[{ required: true, message: "Cần nhập trường này" }]}
                 >
-                    <DatePicker />
+                    <DatePicker maxDate={dayjs()}/>
                 </Form.Item>
                 <Form.Item<FieldType>
                     label="CMND/CCCD"
@@ -77,10 +114,10 @@ export function ImportPage(){
                     name="cccdDate"
                     rules={[{ required: true, message: "Cần nhập trường này" }]}
                 >
-                    <DatePicker />
+                    <DatePicker maxDate={dayjs()}/>
                 </Form.Item>
                 <Form.Item<FieldType>
-                    label="Tại"
+                    label="Cấp tại"
                     name="cccdAt"
                     rules={[{ required: true, message: "Cần nhập trường này" }]}
                 >
@@ -118,11 +155,12 @@ export function ImportPage(){
                     <Input />
                 </Form.Item>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">
+                    <Button type="primary" htmlType="submit" loading={loading}>
                         Thêm nhân viên
                     </Button>
                 </Form.Item>
             </Form>
         </Flex>
+        </>
     );
 }
