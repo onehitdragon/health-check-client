@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Flex, Menu } from "antd";
 import type { MenuProps } from 'antd';
-import { PlusOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { PlusOutlined, AppstoreOutlined, PrinterOutlined } from '@ant-design/icons';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { ImportPage } from './pages/ImportPage';
 import { ExcelImportPage } from './pages/ExcelImportPage';
+import { PrintPage } from './pages/PrintPage';
 
 type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = [
@@ -25,6 +26,11 @@ const items: MenuItem[] = [
     ]
   },
   {
+    key: '/print',
+    icon: <PrinterOutlined />,
+    label: "In giấy khám"
+  },
+  {
     key: '/control',
     icon: <AppstoreOutlined />,
     label: "Quản lý nhân viên"
@@ -41,6 +47,9 @@ function App() {
     if(e.key === "/excelimport"){
       navigate("/excelimport");
     }
+    if(e.key === "/print"){
+      navigate("/print");
+    }
   };
 
   return (
@@ -55,6 +64,7 @@ function App() {
         <Route path='/' element={<HomePage />} />
         <Route path='/normalimport' element={<ImportPage />} />
         <Route path='/excelimport' element={<ExcelImportPage />} />
+        <Route path='/print' element={<PrintPage />} />
       </Routes>
     </Flex>
   )

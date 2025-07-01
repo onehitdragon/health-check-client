@@ -256,6 +256,8 @@ export function ExcelImportPage(){
                 if(data.key === key){
                     const ee: any = {
                         ...data,
+                        cccd: data.cccd.toString(),
+                        phone: data.phone.toString(),
                         gender: genderStringToNumber(data.gender)
                     };
                     delete ee.key;
@@ -265,10 +267,12 @@ export function ExcelImportPage(){
                 }
             }
         }
-        // await api.post("", );
+        const res = await api.post("/employee/addall", toAddEmployees);
+        console.log(res);
         datas = [];
         setSelectedRowKeys([]);
         setImporting(false);
+        messageApi.info(`Đã thêm ${toAddEmployees.length} nhân viên`);
     };
 
     return (
