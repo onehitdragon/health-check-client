@@ -149,6 +149,48 @@ async function createPDFType2(
     const font1 = await pdfDoc.embedFont(font_data);
     const page = pdfDoc.getPage(0);
     const color = rgb(1, 0, 0);
+    page.drawText(ee.fullname, {
+        x: 125,
+        y: 567,
+        size: 12,
+        font: font1,
+        color: color,
+    });
+    page.drawText(ee.gender == 1 ? "Nam" : "Nữ", {
+        x: 445,
+        y: 567,
+        size: 12,
+        font: font1,
+        color: color,
+    });
+    page.drawText(ee.birthday, {
+        x: 140,
+        y: 545,
+        size: 12,
+        font: font1,
+        color: color,
+    });
+    page.drawText(ee.mst, {
+        x: 445,
+        y: 545,
+        size: 12,
+        font: font1,
+        color: color,
+    });
+    page.drawText(ee.work, {
+        x: 215,
+        y: 457,
+        size: 12,
+        font: font1,
+        color: color,
+    });
+    page.drawText(ee.workPlace, {
+        x: 225,
+        y: 414,
+        size: 12,
+        font: font1,
+        color: color,
+    });
 
     return await pdfDoc.save();
 }

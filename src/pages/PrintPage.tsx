@@ -1,7 +1,7 @@
 import { Button, Flex, Form, message, Select, Table, Typography, type FormProps, type TableColumnsType, type TableProps } from "antd";
 import { useEffect, useState } from "react";
 import api from "../api";
-import { createPDFs, createPDFType1, mergePdfs, zipPdfs } from "../tools/pdfTool";
+import { createPDFs, createPDFType1, createPDFType2, mergePdfs, zipPdfs } from "../tools/pdfTool";
 
 const { Title } = Typography;
 type DataType = {
@@ -63,7 +63,7 @@ const columns: TableColumnsType<DataType> = [
         dataIndex: "workPlace"
     }
 ];
-const pdfSampleUrl = [
+const pdfSampleUrls = [
     {
         label: "SỔ KHÁM SỨC KHỎE ĐỊNH KỲ",
         url: "pdf/1.pdf"
@@ -115,20 +115,22 @@ export function PrintPage(){
         }
         let blob: Blob | null = null;
         let filename = "";
-        if(values.sampleIndex == 0){
-            const pdf_res = await api.get(`/${pdfSampleUrl[0].url}`, { responseType: "blob" });
-            const pdf_data = await (pdf_res.data as Blob).arrayBuffer();
-            const front_res = await api.get(`/font/Roboto-Bold.ttf`, { responseType: "blob" });
-            const font_data = await (front_res.data as Blob).arrayBuffer();
-            const sample_datas = await createPDFs(pdf_data, font_data, toPdfEmployees, createPDFType1);
-            if(values.printType == "SinglePDF"){
-                blob = await mergePdfs(sample_datas);
-                filename = `${pdfSampleUrl[0].label}-${toPdfEmployees.length}-nhanvien.pdf`
-            }
-            if(values.printType == "MultiplePDF"){
-                blob = await zipPdfs(toPdfEmployees, sample_datas);
-                filename = `${pdfSampleUrl[0].label}-${toPdfEmployees.length}-nhanvien.zip`
-            }
+        const pdfSampleUrl = pdfSampleUrls[values.sampleIndex];
+        const pdf_res = await api.get(`/${pdfSampleUrl.url}`, { responseType: "blob" });
+        const pdf_data = await (pdf_res.data as Blob).arrayBuffer();
+        const front_res = await api.get(`/font/Roboto-Bold.ttf`, { responseType: "blob" });
+        const font_data = await (front_res.data as Blob).arrayBuffer();
+        const createPDFTypes = [createPDFType1, createPDFType2];
+        const sample_datas = await createPDFs(
+            pdf_data, font_data, toPdfEmployees, createPDFTypes[values.sampleIndex]
+        );
+        if(values.printType == "SinglePDF"){
+            blob = await mergePdfs(sample_datas);
+            filename = `${pdfSampleUrl.label}-${toPdfEmployees.length}-nhanvien.pdf`
+        }
+        if(values.printType == "MultiplePDF"){
+            blob = await zipPdfs(toPdfEmployees, sample_datas);
+            filename = `${pdfSampleUrl.label}-${toPdfEmployees.length}-nhanvien.zip`
         }
         if(blob){
             const url = window.URL.createObjectURL(blob);
@@ -184,8 +186,8 @@ export function PrintPage(){
                             name="sampleIndex"
                         >
                             <Select>
-                                <Select.Option value={0}>{pdfSampleUrl[0].label}</Select.Option>
-                                <Select.Option value={1}>{pdfSampleUrl[1].label}</Select.Option>
+                                <Select.Option value={0}>{pdfSampleUrls[0].label}</Select.Option>
+                                <Select.Option value={1}>{pdfSampleUrls[1].label}</Select.Option>
                             </Select>
                         </Form.Item>
                         <Form.Item>
