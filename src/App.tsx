@@ -5,6 +5,7 @@ import { PlusOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { ImportPage } from './pages/ImportPage';
+import { ExcelImportPage } from './pages/ExcelImportPage';
 
 type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = [
@@ -37,6 +38,9 @@ function App() {
     if(e.key === "/normalimport"){
       navigate("/normalimport");
     }
+    if(e.key === "/excelimport"){
+      navigate("/excelimport");
+    }
   };
 
   return (
@@ -50,6 +54,7 @@ function App() {
       <Routes>
         <Route path='/' element={<HomePage />} />
         <Route path='/normalimport' element={<ImportPage />} />
+        <Route path='/excelimport' element={<ExcelImportPage />} />
       </Routes>
     </Flex>
   )
