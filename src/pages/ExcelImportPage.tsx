@@ -118,6 +118,7 @@ export function ExcelImportPage(){
     const [messageApi, contextHolder] = message.useMessage();
     const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
     const [importing, setImporting] = useState(false);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     const beforeUpload: UploadProps["beforeUpload"] = (file) => {
         const allowExts = [".xlsx", ".xls"]
@@ -144,6 +145,9 @@ export function ExcelImportPage(){
             }
         );
         jsonObj.shift(); // remove header
+        const mstSet = new Set<string>();
+        const cccdSet = new Set<string>();
+        const phoneSet = new Set<string>();
         for(let i = 0; i < jsonObj.length; i++){
             const employee = jsonObj[i] as DataTypeValidation;
             employee.key = i;
@@ -205,20 +209,67 @@ export function ExcelImportPage(){
             if(!employee.workPlace){
                 employee.errors.workPlace = "Yêu cầu trường này";
             }
+            if(Object.keys(employee.errors).length <= 0){
+                if(mstSet.has(employee.mst)){
+                    employee.errors.mst = "MST đã tồn tại trước đó";
+                }
+                if(cccdSet.has(employee.cccd)){
+                    employee.errors.cccd = "CCCD/CMND đã tồn tại trước đó";
+                }
+                if(phoneSet.has(employee.phone)){
+                    employee.errors.phone = "Số điện thoại đã tồn tại trước đó";
+                }
+                mstSet.add(employee.mst);
+                cccdSet.add(employee.cccd);
+                phoneSet.add(employee.phone);
+            }
         }
         datas = jsonObj as any;
+        setSelectedRowKeys([]);
         setImporting(false);
         console.log(jsonObj);
     };
     const rowSelection: TableProps<DataTypeValidation>['rowSelection'] = {
         type: "checkbox",
+        selectedRowKeys: selectedRowKeys,
         getCheckboxProps: (record) => {
             return {
                 disabled: Object.keys(record.errors).length > 0
             };
         },
-        onChange: () => {}
+        onChange: (selectedRowKeys) => {
+            setSelectedRowKeys(selectedRowKeys);
+        }
     }
+    const addSelectedEmployees = async () => {
+        setImporting(true);
+        const toAddEmployees = [];
+        const genderStringToNumber = (gender: string) => {
+            gender = gender.toLowerCase();
+            if(gender === "nam") return 1;
+            return 0;
+        };
+        for(let i = 0; i < selectedRowKeys.length; i++){
+            const key = selectedRowKeys[i];
+            for(let j = 0; j < datas.length; j++){
+                const data = datas[j];
+                if(data.key === key){
+                    const ee: any = {
+                        ...data,
+                        gender: genderStringToNumber(data.gender)
+                    };
+                    delete ee.key;
+                    delete ee.errors;
+                    toAddEmployees.push(ee);
+                    break;
+                }
+            }
+        }
+        // await api.post("", );
+        datas = [];
+        setSelectedRowKeys([]);
+        setImporting(false);
+    };
 
     return (
         <>
@@ -249,6 +300,19 @@ export function ExcelImportPage(){
                 columns={columns}
                 dataSource={datas}
             ></Table>
+            <Flex>
+                {
+                    selectedRowKeys.length > 0
+                    &&
+                    <Button
+                        type="primary"
+                        onClick={addSelectedEmployees}
+                        loading={importing}
+                    >
+                        Thêm {selectedRowKeys.length} nhân viên
+                    </Button>
+                }
+            </Flex>
         </Flex>
         </>
     );
