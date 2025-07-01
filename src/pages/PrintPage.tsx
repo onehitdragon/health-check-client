@@ -28,7 +28,10 @@ const columns: TableColumnsType<DataType> = [
     },
     {
         title: "Giới tính",
-        dataIndex: "gender"
+        dataIndex: "gender",
+        render: (_, record) => {
+            return record.gender == 1 ? "Nam" : "Nữ"   
+        }
     },
     {
         title: "Ngày sinh",
@@ -113,6 +116,10 @@ export function PrintPage(){
                 }
             }
         }
+        // save
+        const res = await api.post("/employee/saveprinthistory", toPdfEmployees.map(ee => ee.mst));
+        console.log(res);
+        // print
         let blob: Blob | null = null;
         let filename = "";
         const pdfSampleUrl = pdfSampleUrls[values.sampleIndex];

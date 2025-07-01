@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage';
 import { ImportPage } from './pages/ImportPage';
 import { ExcelImportPage } from './pages/ExcelImportPage';
 import { PrintPage } from './pages/PrintPage';
+import ControlPage from './pages/ControlPage';
 
 type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = [
@@ -50,6 +51,9 @@ function App() {
     if(e.key === "/print"){
       navigate("/print");
     }
+    if(e.key === "/control"){
+      navigate("/control");
+    }
   };
 
   return (
@@ -65,6 +69,7 @@ function App() {
         <Route path='/normalimport' element={<ImportPage />} />
         <Route path='/excelimport' element={<ExcelImportPage />} />
         <Route path='/print' element={<PrintPage />} />
+        <Route path='/control' element={<ControlPage />} />
       </Routes>
     </Flex>
   )
