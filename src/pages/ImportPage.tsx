@@ -35,6 +35,7 @@ export function ImportPage(){
         setLoading(true);
         try{
             const res = await api.post("/employee/add", employee);
+            console.log(res);
             messageApi.info(`Đã thêm: ${employee.fullname}`);
         }
         catch(err){

@@ -1,8 +1,9 @@
-import { Button, Checkbox, Flex, message, Popconfirm, Table, Typography, type CheckboxOptionType, type TableColumnsType } from "antd";
+import { Button, Checkbox, Flex, Input, message, Popconfirm, Table, Typography, type CheckboxOptionType, type TableColumnsType } from "antd";
 import { useEffect, useState } from "react";
 import api from "../api";
 
 const { Title } = Typography;
+const { Search } = Input;
 type DataType = {
     mst: string,
     fullname: string,
@@ -25,7 +26,16 @@ const columns: TableColumnsType<DataType> = [
     {
         key: 2,
         title: "Họ tên",
-        dataIndex: "fullname"
+        dataIndex: "fullname",
+        sorter: (a, b) => {
+            const l1 = a.fullname.split(" ").at(-1);
+            const l2 = b.fullname.split(" ").at(-1);
+            if(l1 && l2){
+                return l1.charCodeAt(0) - l2[0].charCodeAt(0);
+            }
+            return 0;
+        },
+        sortDirections: ['ascend']
     },
     {
         key: 3,
@@ -33,6 +43,19 @@ const columns: TableColumnsType<DataType> = [
         dataIndex: "gender",
         render: (_, record) => {
             return record.gender == 1 ? "Nam" : "Nữ"   
+        },
+        filters: [
+            {
+                text: "Nam",
+                value: 1
+            },
+            {
+                text: "Nữ",
+                value: 0
+            }
+        ],
+        onFilter: (value, record) => {
+            return record.gender == value;
         }
     },
     {
@@ -98,11 +121,12 @@ const expandColumns: TableColumnsType<ExpandedDataType> = [
 ];
 
 export default function ControlPage(){
-    const [messageApi, contextHolder] = message.useMessage();
+    const [_, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(true);
     const [datas, setDatas] = useState<DataType[]>([]);
     const [checkedList, setCheckedList] = useState(defaultCheckedList);
     const [printHistories, setPrintHistories] = useState<ExpandedDataType[]>([]);
+    const [searchText, setSearchText] = useState("");
     
     const options = columns.map(({ key, title }) => ({
         label: title,
@@ -159,7 +183,7 @@ export default function ControlPage(){
             });
         });
     }, []);
-    const expandedRowRender = (record: DataType, index: number, indent: number, expanded: boolean) => {
+    const expandedRowRender = (record: DataType) => {
         return (
             <Table<ExpandedDataType>
                 rowKey={(record) => record.id}
@@ -170,11 +194,14 @@ export default function ControlPage(){
             />
         );
     };
+    const onSearch = (value: string) => {
+        setSearchText(value);
+    };
 
     return (
         <>
         {contextHolder}
-        <Flex vertical flex={1}>
+        <Flex vertical flex={1} gap={10}>
             <Title>Quản lý nhân viên</Title>
             <Checkbox.Group
                 value={checkedList}
@@ -183,11 +210,31 @@ export default function ControlPage(){
                     setCheckedList(value);
                 }}
             />
+            <Search 
+                placeholder="Tìm kiếm"
+                onSearch={(onSearch)}
+                enterButton
+                style={{ width: 300 }}
+            />
             <Table<DataType>
                 rowKey={(record) => record.mst}
                 loading={loading}
                 columns={newColumns}
-                dataSource={datas}
+                dataSource={datas.filter((ee) => {
+                    if(ee.mst.includes(searchText)){
+                        return true;
+                    }
+                    if(ee.fullname.includes(searchText)){
+                        return true;
+                    }
+                    if(ee.cccd.includes(searchText)){
+                        return true;
+                    }
+                    if(ee.phone.includes(searchText)){
+                        return true;
+                    }
+                    return false;
+                })}
                 expandable={{ expandedRowRender }}
             />
         </Flex>

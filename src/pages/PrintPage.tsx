@@ -82,7 +82,7 @@ type FieldType = {
 }
 
 export function PrintPage(){
-    const [messageApi, contextHolder] = message.useMessage();
+    const [_, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(true);
     const [datas, setDatas] = useState<DataType[]>([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
